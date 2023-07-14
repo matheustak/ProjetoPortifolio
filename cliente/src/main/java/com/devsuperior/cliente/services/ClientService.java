@@ -3,8 +3,6 @@
  */
 package com.devsuperior.cliente.services;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.devsuperior.cliente.dto.ClientDTO;
 import com.devsuperior.cliente.entities.Client;
 import com.devsuperior.cliente.repositories.ClientRepository;
+import com.devsuperior.cliente.services.exceptions.ResourceNotFoundException;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 
 /**
  * @author matheus
@@ -27,10 +29,10 @@ public class ClientService {
 	
 	@Transactional(readOnly = true)
 	public  ClientDTO findById(Long id) {
-		Optional <Client> result = repository.findById(id);
-		Client client = result.get();
-		ClientDTO dto = new ClientDTO(client);
-		return dto;
+		Client client = repository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("Recurso não encontrado"));
+		
+		return new ClientDTO(client);
 	}
 	
 	@Transactional(readOnly = true)
@@ -43,37 +45,56 @@ public class ClientService {
 	
 	@Transactional
 	public ClientDTO insert(ClientDTO dto) {
-	
+		try {
 		Client entity = new Client();
 		copyDtoToEntity(dto, entity);
 		entity = repository.save(entity);
 		
 		return new ClientDTO(entity);
+		
+		}catch (ConstraintViolationException e) {
+			throw new ConstraintViolationException ("Recurso não encontrado!",e.getConstraintViolations());
+		}
+		
 	}
 	
 	@Transactional
-	public ClientDTO update(Long id, ClientDTO dto) {
+	public ClientDTO update(Long id ,ClientDTO dto) {
 	
+		try {
 		Client entity = repository.getReferenceById(id);
 		copyDtoToEntity(dto, entity);
 		entity = repository.save(entity);
-		
 		return new ClientDTO(entity);
+		
+		}catch(EntityNotFoundException e) {
+    	throw new ResourceNotFoundException ("Recurso não encontrado!");
+		}catch(ConstraintViolationException e) {
+			throw new ConstraintViolationException ("Recurso não encontrado!",e.getConstraintViolations());
+		}
+		
 	}
+		
+		
 	
 	@Transactional
 	public void delete(Long id) {
-		repository.deleteById(id);
-		
+		if (!repository.existsById(id)) {
+			throw new ResourceNotFoundException("Recurso não encontrado");
+		}
+        	repository.deleteById(id);  		
+        	
 	}
 	
 
 	private void copyDtoToEntity(ClientDTO dto, Client entity) {
+		
 		entity.setName(dto.getName());
 		entity.setCpf(dto.getCpf());
 		entity.setIncome(dto.getIncome());
 		entity.setChildren(dto.getChildren());
 		entity.setBirthDate(dto.getBirthDate());
+		
 		
 	}
 	

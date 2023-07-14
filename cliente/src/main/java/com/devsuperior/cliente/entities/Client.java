@@ -10,6 +10,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author matheus
@@ -22,12 +25,17 @@ public class Client {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Long id;
-    String name;
-    String cpf;
-    Double income;
-    LocalDate birthDate;
-    Integer children;
+	private Long id;
+	@Size(min = 3, max = 80, message = "Nome precisar ter de 3 a 80 caractere")
+	@NotBlank(message = "Campo requerido")
+	private String name;
+	@Size(min = 11 ,max = 11, message = "Cpf deve ter 11 digitos!")
+	@NotBlank(message = "Campo requerido")
+	private String cpf;
+	private Double income;
+	@PastOrPresent
+	private LocalDate birthDate;
+	private Integer children;
     
     
     public Client() {}

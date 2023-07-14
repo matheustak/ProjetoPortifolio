@@ -22,6 +22,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.devsuperior.cliente.dto.ClientDTO;
 import com.devsuperior.cliente.services.ClientService;
 
+import jakarta.validation.Valid;
+
 /**
  * @author matheus
  *
@@ -51,7 +53,7 @@ public class ClientController {
 	
 	
 	@PostMapping
-	public ResponseEntity <ClientDTO> insert(@RequestBody ClientDTO dto) {
+	public ResponseEntity <ClientDTO> insert(@Valid @RequestBody ClientDTO dto) {
 	    dto =  service.insert(dto);
 	    URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 	   .buildAndExpand(dto.getId()) .toUri();		
@@ -61,7 +63,7 @@ public class ClientController {
 	
 	
 	@PutMapping(value = "/{id}")
-	public ResponseEntity <ClientDTO> findById(@PathVariable long id, @RequestBody ClientDTO dto) {
+	public ResponseEntity <ClientDTO> update(@PathVariable long id,@Valid @RequestBody ClientDTO dto) {
 		dto = service.update(id,dto);
 		return ResponseEntity.ok(dto);
 		
@@ -69,8 +71,8 @@ public class ClientController {
 	
 	
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity <Void> update(@PathVariable long id) {
-		service.delete(id);
+	public ResponseEntity <Void> delete(@PathVariable long id) {
+		  service.delete(id);
 		return ResponseEntity.noContent().build();
 		
 	}
